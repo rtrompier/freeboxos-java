@@ -20,6 +20,7 @@ package org.matmaul.freeboxos;
 
 import org.matmaul.freeboxos.airmedia.AirMediaManager;
 import org.matmaul.freeboxos.connection.ConnectionManager;
+import org.matmaul.freeboxos.download.DownloadManager;
 import org.matmaul.freeboxos.netshare.NetShareManager;
 import org.matmaul.freeboxos.phone.PhoneManager;
 import org.matmaul.freeboxos.system.SystemManager;
@@ -53,6 +54,7 @@ public class FreeboxOsClient {
 	protected UPnPAVManager upnpavManager;
 	protected NetShareManager netShareManager;
 	protected LanManager lanManager;
+	protected DownloadManager downloadManager;
 
 	public FreeboxOsClient(String appId) {
 		this(appId, "mafreebox.freebox.fr");
@@ -74,6 +76,7 @@ public class FreeboxOsClient {
 		upnpavManager = new UPnPAVManager(restManager);
 		netShareManager = new NetShareManager(restManager);
 		lanManager = new LanManager(restManager);
+		downloadManager = new DownloadManager(restManager);
 	}
 
 	public LoginManager getLoginManager() {
@@ -132,4 +135,7 @@ public class FreeboxOsClient {
 		return lanManager;
 	}
 
+	public DownloadManager getDownloadManager() {
+		return downloadManager;
+	}
 }

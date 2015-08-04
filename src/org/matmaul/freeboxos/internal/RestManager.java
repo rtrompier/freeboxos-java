@@ -18,9 +18,13 @@
  */
 package org.matmaul.freeboxos.internal;
 
+import java.beans.Introspector;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -96,6 +100,39 @@ public class RestManager {
 
 	public HttpEntity createJsonEntity(JSONObject jsonObj) {
 		return new StringEntity(jsonObj.toString(), ContentType.APPLICATION_JSON);
+	}
+
+	public HttpEntity createUrlEncodedEntity(Object serializableObject) throws FreeboxException {
+		StringBuilder stringBuilder = new StringBuilder();
+		Boolean first = true;
+		try {
+			for (Method method : serializableObject.getClass().getDeclaredMethods()) {
+				if (Modifier.isPublic(method.getModifiers())
+						&& method.getParameterTypes().length == 0
+						&& method.getReturnType() != void.class
+						&& (method.getName().startsWith("get") || method.getName().startsWith("is"))
+						) {
+					Object value = method.invoke(serializableObject);
+					if (value != null) {
+
+						if(!first)
+							stringBuilder.append("&");
+
+						stringBuilder.append(Introspector.decapitalize(method.getName().substring(method.getName().startsWith("is") ? 2 : 3)))
+								.append("=")
+								.append(value);
+
+						first = false;
+					}
+				}
+			}
+		} catch (IllegalAccessException e) {
+			throw new FreeboxException(e);
+		} catch (InvocationTargetException e) {
+			throw new FreeboxException(e);
+		}
+
+		return new StringEntity(stringBuilder.toString(), ContentType.APPLICATION_FORM_URLENCODED);
 	}
 
 	public <T extends Response<F>, F> F delete(String path, Class<T> beanClass) throws FreeboxException {
